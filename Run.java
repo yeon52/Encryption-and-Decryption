@@ -25,74 +25,74 @@ public class Run {
 		Scanner sc = new Scanner(System.in);
 		String algorithm, mode, encdec, str, key;
 		
-		System.out.println("���ϴ� �˰������� �����ϼ���(DES/DESede/AES)");
+		System.out.println("원하는 알고리즘을 선택하세요(DES/DESede/AES)");
 		algorithm = sc.next();
-		System.out.println("���ϴ� ���۸�带 �����ϼ���(ECB/CBC/CFB/OFB/CTR)");
+		System.out.println("원하는 동작모드를 선택하세요(ECB/CBC/CFB/OFB/CTR)");
 		mode = sc.next();
-		System.out.println("ENC(��ȣȭ)/DEC(��ȣȭ)�� �����ϼ���");
+		System.out.println("ENC(암호화)/DEC(복호화)중 선택하세요");
 		encdec = sc.next();
-		System.out.println("ENC(��ȣȭ)/DEC(��ȣȭ)�� ���ڿ��� �Է��ϼ���");
+		System.out.println("ENC(암호화)/DEC(복호화)할 문자열을 입력하세요");
 		str = sc.next();
-		System.out.println("Ű�� �Է��ϼ��� : ");
+		System.out.println("키를 입력하세요 : ");
 		key = sc.next();
 
-		//Ű����
+		//키생성
 		SecretKeySpec secretkey = new SecretKeySpec(key.getBytes(),algorithm);
-		//Cipher ��ü ����
+		//Cipher 객체 생성
 		Cipher cipher = Cipher.getInstance(algorithm+"/"+mode+"/"+"PKCS5Padding");
-		//�ʱ⺤�� ����
+		//초기벡터 생성
 		IV_16 = new IvParameterSpec(new String("blahblahblahblah").getBytes());
 		IV_8 = new IvParameterSpec(new String("blahblah").getBytes());
-		//���ڴ� ���ڴ�
+		//인코더 디코더
 		Encoder encoder = Base64.getEncoder();
 		Decoder decoder = Base64.getDecoder();
 		
-		if(encdec.equals("ENC")) //��ȣȭ�� �� ���
+		if(encdec.equals("ENC")) //암호화를 할 경우
 		{
-			if(mode.equals("ECB")) //ECB�� �ʱ⺤�� �ʿ�x
+			if(mode.equals("ECB")) //ECB는 초기벡터 필요x
 				cipher.init(Cipher.ENCRYPT_MODE,secretkey);
-			else //ECB��带 ������ �ٸ� ������ ��� �ʱ⺤�� �ʿ�
+			else //ECB모드를 제외한 다른 모드들은 모두 초기벡터 필요
 			{
-				if(algorithm.equals("AES"))//AES�� ��� �ʱ⺤�� ���̴� 16����Ʈ
+				if(algorithm.equals("AES"))//AES일 경우 초기벡터 길이는 16바이트
 					cipher.init(Cipher.ENCRYPT_MODE,secretkey,IV_16);
-				else //AES�� �ƴ� ��� �ʱ⺤�� ���̴� 8����Ʈ
+				else //AES가 아닐 경우 초기벡터 길이는 8바이트
 					cipher.init(Cipher.ENCRYPT_MODE,secretkey,IV_8);
 			}
 			
-			//���ڿ��� ����Ʈ �迭�� �ٲ� �� ��ȣȭ
+			//문자열을 바이트 배열로 바꾼 후 암호화
 			byte[] enc_Bytes = cipher.doFinal(str.getBytes("UTF-8"));
-			//���ڵ�
+			//인코딩
 			byte[] encodedBytes = encoder.encode(enc_Bytes);
-			//���ڿ��� ���� -> ��ȣȭ �Ϸ�
+			//문자열로 변경 -> 암호화 완료
 			String encryption = new String(encodedBytes);
 			
-			//���
-			System.out.println("�� : " + str);
-			System.out.println("��ȣȭ : "+ encryption);
+			//출력
+			System.out.println("평문 : " + str);
+			System.out.println("암호화 : "+ encryption);
 		}
-		else //��ȣȭ�� �� ���
+		else //복호화를 할 경우
 		{
-			if(mode.equals("ECB")) //�ʱ⺤�� �ʿ�x
+			if(mode.equals("ECB")) //초기벡터 필요x
 				cipher.init(Cipher.DECRYPT_MODE,secretkey);
-			else //�ʱ⺤�� �ʿ�
+			else //초기벡터 필요
 			{
-				if(algorithm.equals("AES"))//�ʱ⺤�� 16����Ʈ
+				if(algorithm.equals("AES"))//초기벡터 16바이트
 					cipher.init(Cipher.DECRYPT_MODE,secretkey,IV_16);
 
-				else //�ʱ⺤�� 8����Ʈ
+				else //초기벡터 8바이트
 					cipher.init(Cipher.DECRYPT_MODE,secretkey,IV_8);
 			}
 			
-			//���ڿ��� ����Ʈ�迭�� �ٲ� �� ���ڵ�
+			//문자열을 바이트배열로 바꾼 후 디코딩
 			byte[] decodedBytes = decoder.decode(str.getBytes());
-			//��ȣȭ
+			//복호화
 			byte[] dec_Bytes = cipher.doFinal(decodedBytes); 
-			//���ڿ��� ���� -> ��ȣȭ �Ϸ�
+			//문자열로 변경 -> 복호화 완료
 			String decryption = new String(dec_Bytes,"UTF-8");
 			
-			//���
-			System.out.println("��ȣ�� : " + str);
-			System.out.println("��ȣȭ : " + decryption);
+			//출력
+			System.out.println("암호문 : " + str);
+			System.out.println("복호화 : " + decryption);
 		}
 	}
 }
